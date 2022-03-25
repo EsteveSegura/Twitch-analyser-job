@@ -42,7 +42,7 @@ jobs:
           output: deploy.yml
 
       - name: Deploy to Kubernetes
-        run: kubectl apply -f deploy.yml
+        run: doctl registry kubernetes-manifest | kubectl apply -f deploy.yml
 
       - name: Save DigitalOcean kubeconfig
         run: doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
