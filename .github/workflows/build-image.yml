@@ -13,15 +13,38 @@ jobs:
     steps:
       - name: Checkout the repo 
         uses: actions/checkout@v2
+
       - name: Build image 
         run: docker build -t twitch-analyser-job .
+
       - name: Install doctl 
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
       - name: Log in to DO Container Registry 
         run: doctl registry login --expiry-seconds 600
+
       - name: Tag image 
         run: docker tag twitch-analyser-job:latest registry.digitalocean.com/diogenes/twitch-analyser-job
+
       - name: Push image to DO Container Registry 
         run: docker push registry.digitalocean.com/diogenes/twitch-analyser-job:latest
+
+      - name: Replace Environment Variables
+        uses: danielr1996/envsubst-action@1.0.0
+        env:
+          SENTRY_DSN_URL: ${{ secrets.SENTRY_DSN_URL }}
+          TWITCH_SECRET_ID: ${{ secrets.TWITCH_SECRET_ID }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+        with:
+          input: ./deploy/deployment.yml
+          output: deploy.yml
+
+      - name: Deploy to Kubernetes
+        run: kubectl apply -f deploy.yml
+
+      - name: Save DigitalOcean kubeconfig
+        run: doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
+        env: 
+          CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}

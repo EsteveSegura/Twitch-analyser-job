@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: twitch-analyser-job-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: twitch-analyser-job-svc
+  template:
+    metadata:
+      labels:
+        role: twitch-analyser-job-svc
+    spec:
+      containers:
+      - name: twitch-analyser-job-svc
+        image: registry.digitalocean.com/diogenes/twitch-analyser-job:0.0.1
+        env:
+        - name: TWITCH_OAUTH_URI
+          value: "https://id.twitch.tv/oauth2"
+        - name: TWITCH_API_URI
+          value: "https://api.twitch.tv/helix"
+        - name: TWITCH_CLIENT_ID
+          value: "$TWITCH_CLIENT_ID"
+        - name: TWITCH_SECRET_ID
+          value: "$TWITCH_SECRET_ID"
+        - name: SENTRY_DSN_URL
+          value: "$SENTRY_DSN_URL"
+        ports:
+        - containerPort: 1337
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: twitch-analyser-job-svc
+spec:
+  ports:
+  - port: 1337
+    targetPort: 1337
+  selector:
+    role: twitch-analyser-job-svc
