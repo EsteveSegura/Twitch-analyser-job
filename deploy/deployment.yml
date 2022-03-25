@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: twitch-analyser-job-svc
-        image: registry.digitalocean.com/diogenes/twitch-analyser-job:0.0.1
+        image: registry.digitalocean.com/diogenes/twitch-analyser-job:latest
         env:
         - name: TWITCH_OAUTH_URI
           value: "https://id.twitch.tv/oauth2"
