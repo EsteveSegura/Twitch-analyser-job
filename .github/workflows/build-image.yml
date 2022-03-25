@@ -4,31 +4,31 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Image version'
+        description: "Image version"
         required: true
 
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout the repo 
+      - name: Checkout the repo
         uses: actions/checkout@v2
 
-      - name: Build image 
+      - name: Build image
         run: docker build -t twitch-analyser-job .
 
-      - name: Install doctl 
+      - name: Install doctl
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
 
-      - name: Log in to DO Container Registry 
+      - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
 
-      - name: Tag image 
+      - name: Tag image
         run: docker tag twitch-analyser-job:latest registry.digitalocean.com/diogenes/twitch-analyser-job
 
-      - name: Push image to DO Container Registry 
+      - name: Push image to DO Container Registry
         run: docker push registry.digitalocean.com/diogenes/twitch-analyser-job:latest
 
       - name: Replace Environment Variables
@@ -41,14 +41,17 @@ jobs:
           input: ./deploy/deployment.yml
           output: deploy.yml
 
-      - name: Get pods -o wide
+      - name: ls -la
+        run: ls -la
+
+      - name: Deploy kubernetes
         uses: actions-hub/kubectl@master
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          args: get pods -o wide
+          args: deploy -f ./deploy.yml
 
       - name: Save DigitalOcean kubeconfig
         run: doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
-        env: 
+        env:
           CLUSTER_NAME: ${{ secrets.CLUSTER_NAME }}
