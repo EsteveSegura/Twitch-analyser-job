@@ -35,6 +35,7 @@ kind: Service
 metadata:
   name: twitch-analyser-job-svc
 spec:
+  type: LoadBalancer
   ports:
   - port: 1337
     targetPort: 1337
