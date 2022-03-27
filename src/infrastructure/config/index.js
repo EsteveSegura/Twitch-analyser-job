@@ -14,7 +14,7 @@ const run = {
     tenSeconds: '*/10 * * * * *',
   },
   redisTimeSeries: {
-    host: 'ts',
+    host: '10.245.10.25',
     port: 6379,
   },
   mongo: {
